@@ -1,0 +1,5 @@
+# Ignore the virtual environment directory by giving the exact path relative to the .gitignore file
+/testappjs/
+
+# Ignore the node_modules directory inside your React app
+node_modules/
