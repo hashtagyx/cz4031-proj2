@@ -53,10 +53,10 @@ def execute_query(query, connection_params):
     
         for table_name in all_result:
             block_result[table_name] = []
-            last_block_no = 0
+            column_name = table_name + "_ctid"
+            last_block_no = ast.literal_eval(all_result[table_name][0][column_name])[0]
             last_block = []
             for row in all_result[table_name]:
-                column_name = table_name + "_ctid"
                 # converts the string to a tuple
                 ctid = ast.literal_eval(row[column_name])
                 block_no = ctid[0]
@@ -82,7 +82,7 @@ def execute_query(query, connection_params):
             'block_dict': block_dict, # gives us the blocks that should be highlighted
             'block_result': block_result # gives us all the tuples of all tables queried in a block-based format
         }
-        file_path = 'C:\\Users\\cyx_9\\Desktop\\DB Project 2\\cz4031-proj2\\output.json' # Replace with your file path
+        file_path = 'output.json' # Replace with your file path
         with open(file_path, 'w') as file:
             json.dump(testoutput, file)
 
@@ -127,7 +127,7 @@ def modify_query_add_ctid(sql, table_names):
     return new_sql
 
 def modify_query_all_ctid(table_name):
-    new_select_clause = f"select {table_name}.ctid as {table_name}_ctid, * from {table_name} order by {table_name}.ctid limit 10000"
+    new_select_clause = f"select {table_name}.ctid as {table_name}_ctid, * from {table_name} limit 10000"
 
     return new_select_clause
 
