@@ -7,7 +7,6 @@ import json
 import re
 
 def execute_query(query, connection_params):
-    print('hi')
     query = query.lower().strip()
     if query:
         explain_result = run_explain_query(query, connection_params)
@@ -15,40 +14,16 @@ def execute_query(query, connection_params):
         if explain_result == []:
             return {
                 'explain_result': [],
-                'ctid_result': [],
-                'all_result': []
+                'block_dict': {},
+                'block_result': {}
             }
 
         ctid_result = run_ctid_query(query, connection_params)
-        all_result = all_ctid_query(query, connection_params)
-        # print("explain_result", explain_result)
-        # print("ctid_result", ctid_result)
-        # print("all_result,", all_result)
-        # print('done!')
 
-        # replace this with a function
-        table_names = []
-        for table in parse_one(query).find_all(exp.Table):
-            table_names.append(table.name)
-        # this stores the blocks and tuples that have been fetched (block_dict[table_name] and tuple_dict[table_name])
-        block_dict = {}
-        tuple_dict = {}
-        for table_name in table_names:
-            block_dict[table_name] = set()
-            tuple_dict[table_name] = set()
-        
-        for row in ctid_result:
-            for table_name in table_names:
-                column_name = table_name + "_ctid"
-                # converts the string to a tuple
-                ctid = ast.literal_eval(row[column_name])
-                block_no = ctid[0]
-                block_dict[table_name].add(block_no)
-                tuple_dict[table_name].add(ctid)
-        
-        for table_name in block_dict:
-            block_dict[table_name] = sorted(list(block_dict[table_name]))
+        # get fetched blocks and tuples
+        block_dict, tuple_dict = get_fetched_blocks_and_tuples(query, ctid_result)
 
+        all_result = all_ctid_query(query, tuple_dict, connection_params)
         block_result = {}
     
         for table_name in all_result:
@@ -73,8 +48,6 @@ def execute_query(query, connection_params):
 
         res =  {
             'explain_result': explain_result, # gives us the explain result needed for QEP tree generation
-            'ctid_result': ctid_result, # gives us the ctid result of the query
-            'all_result': all_result, # gives us all the tuples of all tables queried
             'block_dict': block_dict, # gives us the blocks that should be highlighted
             'block_result': block_result # gives us all the tuples of all tables queried in a block-based format
         }
@@ -85,11 +58,35 @@ def execute_query(query, connection_params):
         file_path = 'output.json' # Replace with your file path
         with open(file_path, 'w') as file:
             json.dump(testoutput, file)
-
-        # print("RES OUTPUT:", res)
         return res
-    # this line will never run because query input is required in index.html
+    # this line will never run because query input is required in interface.py
     return jsonify({'error': 'No query provided'}), 400
+
+def get_fetched_blocks_and_tuples(query, ctid_result):
+    table_names = []
+    for table in parse_one(query).find_all(exp.Table):
+        table_names.append(table.name)
+    # this stores the blocks and tuples that have been fetched (block_dict[table_name] and tuple_dict[table_name])
+    block_dict = {}
+    tuple_dict = {}
+    for table_name in table_names:
+        block_dict[table_name] = set()
+        tuple_dict[table_name] = set()
+    
+    for row in ctid_result:
+        for table_name in table_names:
+            column_name = table_name + "_ctid"
+            # converts the string to a tuple
+            ctid = ast.literal_eval(row[column_name])
+            block_no = ctid[0]
+            block_dict[table_name].add(block_no)
+            tuple_dict[table_name].add(ctid)
+    
+    for table_name in block_dict:
+        block_dict[table_name] = sorted(list(block_dict[table_name]))
+        tuple_dict[table_name] = sorted(list(tuple_dict[table_name]))
+    
+    return block_dict, tuple_dict
 
 def run_explain_query(query, connection_params):
     try:
@@ -126,12 +123,14 @@ def modify_query_add_ctid(sql, table_names):
 
     return new_sql
 
-def modify_query_all_ctid(table_name):
-    new_select_clause = f"select {table_name}.ctid as {table_name}_ctid, * from {table_name} limit 10000"
+def get_query_all_ctid(table_name, offset_val):
+    new_select_clause = f"""select {table_name}.ctid as {table_name}_ctid, * from {table_name}
+     order by {table_name}.ctid limit 10000 offset {offset_val}
+    """
 
     return new_select_clause
 
-def all_ctid_query(query, connection_params):
+def all_ctid_query(query, tuple_dict, connection_params):
     try:
         conn = psycopg2.connect(**connection_params)
         cur = conn.cursor()
@@ -141,9 +140,22 @@ def all_ctid_query(query, connection_params):
         
         results = {}
         for table_name in table_names:
+            start_block_ctid = tuple_dict[table_name][0]
+            print(start_block_ctid)
+            offset_val_query = f"""
+            SELECT rownum FROM (
+                SELECT ROW_NUMBER() OVER (ORDER BY ctid) AS rownum, ctid
+                FROM {table_name}
+            ) AS subquery
+            WHERE ctid = '{str(start_block_ctid)}';
+            """
+            cur.execute(offset_val_query)
+            offset_val = cur.fetchone()[0]
+            print(offset_val)
+            
             all_query = f"""
             SELECT array_to_json(array_agg(row_to_json(t))) FROM (
-                {modify_query_all_ctid(table_name)}
+                {get_query_all_ctid(table_name, offset_val)}
             ) t
             """
             cur.execute(all_query)
@@ -177,3 +189,18 @@ def run_ctid_query(query, connection_params):
         print(f"Error in run_ctid_query: {error}")
         return []
     
+def is_query_valid(query):
+    # Check if the query is empty
+    if not query.strip():
+        return False
+
+    # List of forbidden keywords
+    forbidden_keywords = ['delete', 'update', 'with']
+
+    # Check if any forbidden keyword is in the query
+    # The query is converted to lowercase to make the check case-insensitive
+    if any(keyword in query.lower() for keyword in forbidden_keywords):
+        return False
+
+    # If the query passes all checks
+    return True
