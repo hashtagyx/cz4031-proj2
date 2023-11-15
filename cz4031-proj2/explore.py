@@ -7,7 +7,10 @@ import json
 import re
 
 def execute_query(query, connection_params):
+    # Remove all trailing spaces and convert to lowercase
     query = query.lower().strip()
+    # Remove all trailing semicolons
+    query = query.replace(";", "")
     if query:
         explain_result = run_explain_query(query, connection_params)
 

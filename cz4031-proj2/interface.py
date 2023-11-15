@@ -128,8 +128,11 @@ class App(QMainWindow):
 
         # Matplotlib plot
         fig, axs = self.create_matplotlib_plot(json_output)
-        canvas = FigureCanvas(fig)
-        self.plot_layout.addWidget(canvas)
+
+        # Opens a new window with the visualization of the first 100 blocks from the first block hit
+        fig.show()
+        # canvas = FigureCanvas(fig)
+        # self.plot_layout.addWidget(canvas)
 
     def create_matplotlib_plot(self, json_output):
         self.last_clicked_cell = None
@@ -237,7 +240,7 @@ class App(QMainWindow):
             # cb = fig.colorbar(m, ax=ax)
             # cb.remove()
 
-            ax.set_title(f'Table {table}')
+            ax.set_title(f'Table Name: {table}')
             
 
             # Connect the same on_move listener to all graphs
