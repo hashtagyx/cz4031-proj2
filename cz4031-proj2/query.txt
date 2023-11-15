@@ -1,0 +1,237 @@
+{
+  "ctid_result": [
+    {
+      "c_acctbal": 6503.77,
+      "customer_ctid": "(219,28)",
+      "orders_ctid": "(39,44)"
+    },
+    {
+      "c_acctbal": 9500.76,
+      "customer_ctid": "(351,36)",
+      "orders_ctid": "(63,31)"
+    },
+    {
+      "c_acctbal": 625.79,
+      "customer_ctid": "(583,31)",
+      "orders_ctid": "(105,44)"
+    },
+    {
+      "c_acctbal": 6687.46,
+      "customer_ctid": "(759,25)",
+      "orders_ctid": "(137,42)"
+    },
+    {
+      "c_acctbal": 6189.12,
+      "customer_ctid": "(816,6)",
+      "orders_ctid": "(148,7)"
+    },
+    {
+      "c_acctbal": 1213.86,
+      "customer_ctid": "(873,42)",
+      "orders_ctid": "(158,43)"
+    },
+    {
+      "c_acctbal": 2539.24,
+      "customer_ctid": "(1052,14)",
+      "orders_ctid": "(191,16)"
+    },
+    {
+      "c_acctbal": 4858.74,
+      "customer_ctid": "(1252,38)",
+      "orders_ctid": "(227,33)"
+    },
+    {
+      "c_acctbal": -184.62,
+      "customer_ctid": "(1277,14)",
+      "orders_ctid": "(231,57)"
+    },
+    {
+      "c_acctbal": 7606.35,
+      "customer_ctid": "(1598,16)",
+      "orders_ctid": "(290,24)"
+    },
+    {
+      "c_acctbal": 8935.36,
+      "customer_ctid": "(1643,20)",
+      "orders_ctid": "(298,36)"
+    },
+    {
+      "c_acctbal": 997.7,
+      "customer_ctid": "(1697,7)",
+      "orders_ctid": "(308,19)"
+    },
+    {
+      "c_acctbal": 4181.12,
+      "customer_ctid": "(1774,31)",
+      "orders_ctid": "(322,27)"
+    },
+    {
+      "c_acctbal": 9732.93,
+      "customer_ctid": "(1828,15)",
+      "orders_ctid": "(332,10)"
+    },
+    {
+      "c_acctbal": 9550.21,
+      "customer_ctid": "(2004,33)",
+      "orders_ctid": "(364,20)"
+    },
+    {
+      "c_acctbal": 4736.54,
+      "customer_ctid": "(2082,39)",
+      "orders_ctid": "(378,29)"
+    },
+    {
+      "c_acctbal": 5606.4,
+      "customer_ctid": "(2111,7)",
+      "orders_ctid": "(383,38)"
+    },
+    {
+      "c_acctbal": 4184.41,
+      "customer_ctid": "(2156,27)",
+      "orders_ctid": "(391,52)"
+    },
+    {
+      "c_acctbal": 2295.42,
+      "customer_ctid": "(2397,24)",
+      "orders_ctid": "(435,35)"
+    },
+    {
+      "c_acctbal": 285.03,
+      "customer_ctid": "(2545,9)",
+      "orders_ctid": "(462,24)"
+    },
+    {
+      "c_acctbal": 8157,
+      "customer_ctid": "(2579,24)",
+      "orders_ctid": "(468,39)"
+    },
+    {
+      "c_acctbal": 1716.57,
+      "customer_ctid": "(2706,13)",
+      "orders_ctid": "(491,47)"
+    },
+    {
+      "c_acctbal": 1920.16,
+      "customer_ctid": "(2879,15)",
+      "orders_ctid": "(523,15)"
+    },
+    {
+      "c_acctbal": 307.76,
+      "customer_ctid": "(3257,13)",
+      "orders_ctid": "(592,12)"
+    },
+    {
+      "c_acctbal": 1812.99,
+      "customer_ctid": "(3322,12)",
+      "orders_ctid": "(603,52)"
+    },
+    {
+      "c_acctbal": 4883.35,
+      "customer_ctid": "(3332,12)",
+      "orders_ctid": "(605,40)"
+    },
+    {
+      "c_acctbal": 5105.34,
+      "customer_ctid": "(3465,4)",
+      "orders_ctid": "(629,51)"
+    },
+    {
+      "c_acctbal": 8585.9,
+      "customer_ctid": "(3519,27)",
+      "orders_ctid": "(639,49)"
+    }
+  ],
+  "explain_result": [
+    {
+      "Execution Time": 43.596,
+      "Plan": {
+        "Actual Loops": 1,
+        "Actual Rows": 28,
+        "Actual Startup Time": 2.652,
+        "Actual Total Time": 43.549,
+        "Async Capable": false,
+        "Inner Unique": true,
+        "Join Type": "Inner",
+        "Local Dirtied Blocks": 0,
+        "Local Hit Blocks": 0,
+        "Local Read Blocks": 0,
+        "Local Written Blocks": 0,
+        "Merge Cond": "(customer.c_custkey = orders.o_orderkey)",
+        "Node Type": "Merge Join",
+        "Parallel Aware": false,
+        "Plans": [
+          {
+            "Actual Loops": 1,
+            "Actual Rows": 150000,
+            "Actual Startup Time": 0.007,
+            "Actual Total Time": 28.933,
+            "Alias": "customer",
+            "Async Capable": false,
+            "Index Name": "customer_pkey",
+            "Local Dirtied Blocks": 0,
+            "Local Hit Blocks": 0,
+            "Local Read Blocks": 0,
+            "Local Written Blocks": 0,
+            "Node Type": "Index Scan",
+            "Parallel Aware": false,
+            "Parent Relationship": "Outer",
+            "Relation Name": "customer",
+            "Scan Direction": "Forward",
+            "Shared Dirtied Blocks": 0,
+            "Shared Hit Blocks": 4108,
+            "Shared Read Blocks": 0,
+            "Shared Written Blocks": 0,
+            "Temp Read Blocks": 0,
+            "Temp Written Blocks": 0
+          },
+          {
+            "Actual Loops": 1,
+            "Actual Rows": 29,
+            "Actual Startup Time": 0.421,
+            "Actual Total Time": 6.92,
+            "Alias": "orders",
+            "Async Capable": false,
+            "Filter": "(o_custkey < 100)",
+            "Index Name": "orders_pkey",
+            "Local Dirtied Blocks": 0,
+            "Local Hit Blocks": 0,
+            "Local Read Blocks": 0,
+            "Local Written Blocks": 0,
+            "Node Type": "Index Scan",
+            "Parallel Aware": false,
+            "Parent Relationship": "Inner",
+            "Relation Name": "orders",
+            "Rows Removed by Filter": 38044,
+            "Scan Direction": "Forward",
+            "Shared Dirtied Blocks": 0,
+            "Shared Hit Blocks": 776,
+            "Shared Read Blocks": 0,
+            "Shared Written Blocks": 0,
+            "Temp Read Blocks": 0,
+            "Temp Written Blocks": 0
+          }
+        ],
+        "Shared Dirtied Blocks": 0,
+        "Shared Hit Blocks": 4884,
+        "Shared Read Blocks": 0,
+        "Shared Written Blocks": 0,
+        "Temp Read Blocks": 0,
+        "Temp Written Blocks": 0
+      },
+      "Planning": {
+        "Local Dirtied Blocks": 0,
+        "Local Hit Blocks": 0,
+        "Local Read Blocks": 0,
+        "Local Written Blocks": 0,
+        "Shared Dirtied Blocks": 0,
+        "Shared Hit Blocks": 210,
+        "Shared Read Blocks": 0,
+        "Shared Written Blocks": 0,
+        "Temp Read Blocks": 0,
+        "Temp Written Blocks": 0
+      },
+      "Planning Time": 5.208,
+      "Triggers": []
+    }
+  ]
+}
