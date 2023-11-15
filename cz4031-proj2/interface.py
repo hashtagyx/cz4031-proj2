@@ -276,9 +276,11 @@ class App(QMainWindow):
                         #     json.dump(block_data, file)
                     else:
                         # block_data = f'EMPTY BLOCK {block_number} \n{self.current_lat} Long, {self.current_lon} Lat \n Event Long: {event_lon}, Event Lat: {event_lat}'
-                        block_data = f'Current Block: {block_number} \n Empty Block'
+                        wrapped_text = f'Table Name: {table_name}\nCurrent Block: {block_number}\nEmpty Block'
+                        wrapped_text = '\n'.join(wrapped_text.split('\n'))
                         
-                        wrapped_text = textwrap.fill(block_data, width=20)
+                        
+                        # wrapped_text = textwrap.fill(block_data, width=20)
                     if num_tables > 1:
                         axs[-1, 1].clear()
                         axs[-1, 1].text(0.5, 0.5, wrapped_text, ha='center', va='center', fontsize=12)

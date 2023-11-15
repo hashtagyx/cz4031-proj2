@@ -158,6 +158,7 @@ def all_ctid_query(query, tuple_dict, connection_params):
         results = {}
         for table_name in table_names:
             start_block_ctid = tuple_dict[table_name][0]
+            
             offset_val_query = f"""
             SELECT rownum FROM (
                 SELECT ROW_NUMBER() OVER (ORDER BY ctid) AS rownum, ctid
@@ -165,6 +166,20 @@ def all_ctid_query(query, tuple_dict, connection_params):
             ) AS subquery
             WHERE ctid = '{str(start_block_ctid)}';
             """
+
+            # start_block_number = ast.literal_eval(start_block_ctid)
+            # offset_val_query = f"""
+            # SELECT rownum FROM (
+            #     SELECT ROW_NUMBER() OVER (ORDER BY ctid) AS rownum, ctid
+            #     FROM {table_name}
+            # ) AS subquery
+            # WHERE (ctid::text::point)[0] = {start_block_number}
+            # ORDER BY rownum
+            # LIMIT 1
+            # """
+
+            # print("Start Block Number", start_block_number)
+            # print("offset_val_query", offset_val_query)
             
             cur.execute(offset_val_query)
             # the query returns the row number of the first tuple found. hence, we subtract one from the
