@@ -140,7 +140,6 @@ class App(QMainWindow):
 
         fig, axs = plt.subplots(num_tables, 2, figsize=(8, 2 * num_tables), gridspec_kw={'hspace': 0.5})
         
-        
         lon_range = np.arange(0, 10, 1)
         lat_range = np.arange(0, 10, 1)
 
@@ -206,9 +205,13 @@ class App(QMainWindow):
         for i in range(num_tables):
             if num_tables > 1:
                 ax = axs[i, 0]  # Use two indices if axs is 2D
+                axs[i, 1].clear()
+                axs[i, 1].axis('off')
             else:
                 ax = axs[0]  # Use one index if axs is 1D
-            
+                axs[1].clear()
+                axs[1].axis('off')
+
             table = tables[i]
             blocks = block_result[table]
             blocks_accessed = json_output['block_dict'][table]
@@ -231,18 +234,17 @@ class App(QMainWindow):
             m = ax.pcolormesh(mlon, mlat, grid_colour, cmap='Blues', edgecolors='black', linewidths=0.5, vmin=0, vmax=1)
             self.table_to_colour_grids[table] = (m, grid_colour)
             # Remove colorbar
-            cb = fig.colorbar(m, ax=ax)
-            cb.remove()
+            # cb = fig.colorbar(m, ax=ax)
+            # cb.remove()
 
             ax.set_title(f'Table {table}')
-            ax.axis('off')
+            
 
             # Connect the same on_move listener to all graphs
             # cid = fig.canvas.mpl_connect('motion_notify_event', lambda event, ax=axs[i, 0], table_name=table: on_move(event, ax, table))
             print(table)
             on_move_lambda = make_on_move_lambda(ax, table, grid_colour, m)
             cid = fig.canvas.mpl_connect('button_press_event', on_move_lambda)
-            # cid = fig.canvas.mpl_connect('button_press_event', lambda event, ax=ax, table_name=table, grid_colour=grid_colour, m=m: on_move(event, ax, table, grid_colour, m))
 
         return fig, ax
     
