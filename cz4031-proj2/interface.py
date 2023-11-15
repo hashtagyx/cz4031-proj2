@@ -21,6 +21,8 @@ class App(QMainWindow):
         self.height = 800
         self.current_lat = None
         self.current_lon = None
+        self.table_to_colour_grids = {}
+        self.last_clicked_cell = None
         self.initUI()
 
     def initUI(self):
@@ -45,16 +47,36 @@ class App(QMainWindow):
         # Connect button to function
         self.button.clicked.connect(self.on_submit)
 
-        # Plot area
-        self.scroll_area = QScrollArea(self)
+        # # Plot area
+        # scrollable_area = QScrollArea()
+        # layout = QVBoxLayout()
+        # layout.addWidget(scrollable_area)
+
+        # container = QWidget()
+        # container.setLayout(layout)
+
+        # self.setCentralWidget(container)
+
         self.plot_widget = QWidget(self)
         self.plot_layout = QVBoxLayout(self.plot_widget)
-        self.scroll_area.setWidget(self.plot_widget)
-        self.scroll_area.setWidgetResizable(True)
-        self.scroll_area.setGeometry(100, 140, self.width - 120, self.height - 160)
+        self.plot_widget.setGeometry(100, 140, self.width - 120, self.height - 160)
+
+
+        # resizeable
+        # self.setWidget(self.plot_widget)
+        # self.setWidgetResizable(True)
+
+        # self.scroll_area = QScrollArea(self)
+        # self.plot_widget = QWidget(self)
+        # self.plot_layout = QVBoxLayout(self.plot_widget)
+        # self.scroll_area.setWidget(self.plot_widget)
+        # self.scroll_area.setWidgetResizable(True)
+        # self.scroll_area.setGeometry(100, 140, self.width - 120, self.height - 160)
         # self.plot_widget.setGeometry(100, 120, 500, 300)
 
         self.show()
+        
+    
 
     # def initUI(self):
     #     self.setWindowTitle(self.title)
@@ -110,6 +132,8 @@ class App(QMainWindow):
         self.plot_layout.addWidget(canvas)
 
     def create_matplotlib_plot(self, json_output):
+        self.last_clicked_cell = None
+        self.table_to_colour_grids = {}
         block_result = json_output['block_result']
         num_tables = len(block_result)
         tables = list(block_result.keys())
@@ -120,40 +144,77 @@ class App(QMainWindow):
         lon_range = np.arange(0, 10, 1)
         lat_range = np.arange(0, 10, 1)
 
+        def make_on_move_lambda(ax, table_name, grid_colour, m):
+            return lambda event: on_move(event, ax, table_name, grid_colour, m)
 
-        def on_move(event, ax, table_number):
+        def on_move(event, ax, table_name, grid_colour, m):
             if event.inaxes is ax:
-                event_lat = floor(event.ydata) if 0 <= event.ydata < len(lat_range) else None
-                event_lon = floor(event.xdata) if 0 <= event.xdata < len(lon_range) else None
+                event_lat = event.ydata if -0.5 <= event.ydata < len(lat_range) else None
+                event_lon = event.xdata if -0.5 <= event.xdata < len(lon_range) else None
 
                 # Only update if we have valid coordinates and they are different than the previous update
                 if event_lat is not None and event_lon is not None and (event_lat != self.current_lat or event_lon != self.current_lon):
-                    self.current_lat = event_lat
-                    self.current_lon = event_lon
+                    self.current_lat = round(event_lat)
+                    self.current_lon = round(event_lon)
                     block_number = self.current_lat*10 + self.current_lon
-                    if block_number < len(block_result[table_number]):
-                        block_data = block_result[table_number][self.current_lat*10 + self.current_lon]
+                    if block_number < len(block_result[table_name]):
+                        block_data = block_result[table_name][self.current_lat*10 + self.current_lon]
                         # Wrap the text using textwrap
-                        wrapped_text = textwrap.fill(f"{table_number} Table, {block_data}", width=20)
+                        wrapped_text = textwrap.fill(f"{self.current_lat} Long, {self.current_lon} Lat, Event Long: {event_lon}, Event Lat: {event_lat}, {table_name} Table, {block_data[0][f'{table_name}_ctid']}", width=20)
+
+                        # remove json appending
                         file_path = 'hover_output.json' # Replace with your file path
                         with open(file_path, 'w') as file:
                             json.dump(block_data, file)
                     else:
-                        block_data = f'EMPTY BLOCK {block_number}'
+                        block_data = f'EMPTY BLOCK {block_number} \n{self.current_lat} Long, {self.current_lon} Lat \n Event Long: {event_lon}, Event Lat: {event_lat}'
                         wrapped_text = textwrap.fill(block_data, width=20)
-                    axs[-1, 1].clear()
-                    axs[-1, 1].text(0.5, 0.5, wrapped_text, ha='center', va='center', fontsize=12)
-                    axs[-1, 1].axis('off')
+                    if num_tables > 1:
+                        axs[-1, 1].clear()
+                        axs[-1, 1].text(0.5, 0.5, wrapped_text, ha='center', va='center', fontsize=12)
+                        axs[-1, 1].axis('off')
+                    else:
+                        axs[1].clear()
+                        axs[1].text(0.5, 0.5, wrapped_text, ha='center', va='center', fontsize=12)
+                        axs[1].axis('off')
                     fig.canvas.draw_idle()
 
-        for i in range(num_tables):
+                x_index = int(event.xdata + 0.5)
+                y_index = int(event.ydata + 0.5)
+                
+                if 0 <= x_index < grid_colour.shape[1] and 0 <= y_index < grid_colour.shape[0]:
+                    print("on_move", table_name)
+                    # print(self.last_clicked_cell)
+                    # Restore the color of last click
+                    if self.last_clicked_cell:
+                        old_table, old_y, old_x, old_colour = self.last_clicked_cell
+                        old_m, old_grid_colour = self.table_to_colour_grids[old_table]
+                        old_grid_colour[old_y, old_x] = old_colour
+                        old_m.set_array(old_grid_colour.ravel())
+                        # print(old_m, old_grid_colour)
+                    # Change the color of the clicked cell
+                    self.last_clicked_cell = (table_name, y_index, x_index, grid_colour[y_index, x_index])
+                    grid_colour[y_index, x_index] = 0.5
 
+                    # Update the color mesh with the new color
+                    m.set_array(grid_colour.ravel())
+
+                    # Redraw the canvas
+                    fig.canvas.draw_idle()
+
+
+        for i in range(num_tables):
+            if num_tables > 1:
+                ax = axs[i, 0]  # Use two indices if axs is 2D
+            else:
+                ax = axs[0]  # Use one index if axs is 1D
+            
             table = tables[i]
             blocks = block_result[table]
             blocks_accessed = json_output['block_dict'][table]
             blocks_accessed_set = set(blocks_accessed)
 
-            ctid_name = table+'_ctid'
+            ctid_name = table + '_ctid'
             starting_block = ast.literal_eval(blocks[0][0][ctid_name])[0]
 
             grid_colour = np.zeros((10, 10))
@@ -166,21 +227,23 @@ class App(QMainWindow):
 
             mlon, mlat = np.meshgrid(lon_range, lat_range)
 
-            # plot colour mesh Add edgecolors and linewidths to draw borders around cells
-            m = axs[i, 0].pcolormesh(mlon, mlat, grid_colour, cmap='Blues', edgecolors='black', linewidths=0.5, vmin=0, vmax=1)
-
+            # plot colour mesh, add edgecolors and linewidths to draw borders around cells
+            m = ax.pcolormesh(mlon, mlat, grid_colour, cmap='Blues', edgecolors='black', linewidths=0.5, vmin=0, vmax=1)
+            self.table_to_colour_grids[table] = (m, grid_colour)
             # Remove colorbar
-            cb = fig.colorbar(m, ax=axs[i, 0])
+            cb = fig.colorbar(m, ax=ax)
             cb.remove()
 
-            axs[i, 0].set_title(f'Table {table}')
-
-            # Global variables to keep track of which values are currently plotted in ax2
-            current_lat, current_lon = None, None
-
-            axs[i, 1].axis('off')
+            ax.set_title(f'Table {table}')
+            ax.axis('off')
 
             # Connect the same on_move listener to all graphs
-            cid = fig.canvas.mpl_connect('motion_notify_event', lambda event, ax=axs[i, 0], table_number=table: on_move(event, ax, table_number))
+            # cid = fig.canvas.mpl_connect('motion_notify_event', lambda event, ax=axs[i, 0], table_name=table: on_move(event, ax, table))
+            print(table)
+            on_move_lambda = make_on_move_lambda(ax, table, grid_colour, m)
+            cid = fig.canvas.mpl_connect('button_press_event', on_move_lambda)
+            # cid = fig.canvas.mpl_connect('button_press_event', lambda event, ax=ax, table_name=table, grid_colour=grid_colour, m=m: on_move(event, ax, table, grid_colour, m))
 
-        return fig, axs
+        return fig, ax
+    
+    
