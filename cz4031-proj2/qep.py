@@ -132,10 +132,22 @@ class Widget(QtWidgets.QWidget):
         self.resize(1000,800)
 
     def show_graph(self):
-        # df = px.data.tips()
-        # fig = px.box(df, x="day", y="total_bill", color="smoker")
-        # fig.update_traces(quartilemethod="exclusive") # or "inclusive", or "linear" by default
-        self.browser.setHtml(fig.to_html(include_plotlyjs='cdn'))
+        # Create a new QDialog for the pop-up window
+        pop_up_dialog = QtWidgets.QDialog(self)
+        pop_up_dialog.setWindowTitle('Query Execution Plan')
+        pop_up_dialog.resize(700,500)
+
+        # Embed a QWebEngineView for the figure in the pop-up dialog
+        pop_up_browser = QtWebEngineWidgets.QWebEngineView(pop_up_dialog)
+        pop_up_browser.setHtml(fig.to_html(include_plotlyjs='cdn'))
+
+        # Set layout for the pop-up dialog
+        layout = QtWidgets.QVBoxLayout(pop_up_dialog)
+        layout.addWidget(pop_up_browser)
+
+        # Show the pop-up dialog
+        pop_up_dialog.exec_()
+        # self.browser.setHtml(fig.to_html(include_plotlyjs='cdn'))
 
 # if __name__ == "__main__":
 app = QtWidgets.QApplication([])
