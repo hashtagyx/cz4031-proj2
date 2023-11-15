@@ -68,13 +68,13 @@ def execute_query(query, connection_params):
             'block_dict': block_dict, # gives us the blocks that should be highlighted
             'block_result': block_result # gives us all the tuples of all tables queried in a block-based format
         }
-        # testoutput = {
-        #     'block_dict': block_dict, # gives us the blocks that should be highlighted
-        #     'block_result': block_result # gives us all the tuples of all tables queried in a block-based format
-        # }
-        # file_path = 'output.json' # Replace with your file path
-        # with open(file_path, 'w') as file:
-        #     json.dump(testoutput, file)
+        testoutput = {
+            'block_dict': block_dict, # gives us the blocks that should be highlighted
+            'block_result': block_result # gives us all the tuples of all tables queried in a block-based format
+        }
+        file_path = 'output.json' # Replace with your file path
+        with open(file_path, 'w') as file:
+            json.dump(testoutput, file)
         return res
     # this line will never run because query input is required in interface.py
     return jsonify({'error': 'No query provided'}), 400

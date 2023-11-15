@@ -149,8 +149,10 @@ class App(QMainWindow):
         block_ids = self.data['block_dict'][relation]
 
         last_block = ast.literal_eval(self.data['block_result'][relation][-1][-1][f"{relation}_ctid"])[0]
-        last_block_index = block_ids.index(last_block)
-        block_ids = self.data['block_dict'][relation][:last_block_index+1]
+        first_block = ast.literal_eval(self.data['block_result'][relation][0][0][f"{relation}_ctid"])[0]
+        # last_block_index = block_ids.index(last_block)
+        # block_ids = self.data['block_dict'][relation][:last_block_index+1]
+        block_ids = [x for x in range(first_block, last_block+1)]
 
         block_ids = list(map(str, block_ids))
         self.block_id_selector.clear()
@@ -264,7 +266,7 @@ class App(QMainWindow):
                         no_of_tuples = len(block_data)
                         count_true = sum(1 for entry in block_data if entry.get("fetched"))
 
-                        wrapped_text = f"Current Block: {block_number} \n Number of Tuples in Block: {no_of_tuples} \n Number of Tuples Hit: {count_true}"
+                        wrapped_text = f"Table Name: {table_name}\nCurrent Block: {block_number}\nNumber of Tuples in Block: {no_of_tuples}\nNumber of Tuples Hit: {count_true}"
                         wrapped_text = '\n'.join(wrapped_text.split('\n'))
                         
 
