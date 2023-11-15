@@ -83,7 +83,7 @@ class App(QMainWindow):
         # spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         # self.verticalLayout.addItem(spacerItem)
 
-        self.num_blocks_explored = QLabel("Blocks Explored:")
+        # self.num_blocks_explored = QLabel("Blocks Explored:")
         self.select_relation = QLabel("Select Relation:")
         self.select_block_id = QLabel("Select Block ID:")
         # view tuples in selected block
@@ -102,7 +102,7 @@ class App(QMainWindow):
         self.table = None
         self.scroll_area = None
 
-        self.verticalLayout.addWidget(self.num_blocks_explored)
+        # self.verticalLayout.addWidget(self.num_blocks_explored)
         self.verticalLayout.addWidget(self.select_relation)
         self.verticalLayout.addWidget(self.relation_selector)
         self.verticalLayout.addWidget(self.select_block_id)
@@ -164,8 +164,8 @@ class App(QMainWindow):
         self.block_id_selector.addItems(block_ids)
         self.block_id_selector.setEnabled(True)
         # Update the label with the number of blocks hit
-        blocks_hit = len(self.data['block_dict'][relation])
-        self.num_blocks_explored.setText(f"Blocks Explored: {blocks_hit}")
+        # blocks_hit = len(self.data['block_dict'][relation])
+        # self.num_blocks_explored.setText(f"Blocks Explored: {blocks_hit}")
 
 
     def display_curr_block_contents(self, block_id):
@@ -428,6 +428,7 @@ class App(QMainWindow):
         fig.add_trace(go.Scatter(x=Xe,
                             y=Ye,
                             mode='lines',
+                            name='',
                             line=dict(color='rgb(210,210,210)', width=1),
                             hoverinfo='none'
                             ))
