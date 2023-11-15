@@ -1,0 +1,248 @@
+{
+  "block_dict": { "nation": [0], "region": [0] },
+  "block_result": {
+    "nation": [
+      [
+        {
+          "nation_ctid": "(0,1)",
+          "n_nationkey": 0,
+          "n_name": "ALGERIA                  ",
+          "n_regionkey": 0,
+          "n_comment": " haggle. carefully final deposits detect slyly agai",
+          "fetched": true
+        },
+        {
+          "nation_ctid": "(0,2)",
+          "n_nationkey": 1,
+          "n_name": "ARGENTINA                ",
+          "n_regionkey": 1,
+          "n_comment": "al foxes promise slyly according to the regular accounts. bold requests alon",
+          "fetched": true
+        },
+        {
+          "nation_ctid": "(0,3)",
+          "n_nationkey": 2,
+          "n_name": "BRAZIL                   ",
+          "n_regionkey": 1,
+          "n_comment": "y alongside of the pending deposits. carefully special packages are about the ironic forges. slyly special ",
+          "fetched": true
+        },
+        {
+          "nation_ctid": "(0,4)",
+          "n_nationkey": 3,
+          "n_name": "CANADA                   ",
+          "n_regionkey": 1,
+          "n_comment": "eas hang ironic, silent packages. slyly regular packages are furiously over the tithes. fluffily bold",
+          "fetched": true
+        },
+        {
+          "nation_ctid": "(0,5)",
+          "n_nationkey": 4,
+          "n_name": "EGYPT                    ",
+          "n_regionkey": 4,
+          "n_comment": "y above the carefully unusual theodolites. final dugouts are quickly across the furiously regular d",
+          "fetched": true
+        },
+        {
+          "nation_ctid": "(0,6)",
+          "n_nationkey": 5,
+          "n_name": "ETHIOPIA                 ",
+          "n_regionkey": 0,
+          "n_comment": "ven packages wake quickly. regu",
+          "fetched": true
+        },
+        {
+          "nation_ctid": "(0,7)",
+          "n_nationkey": 6,
+          "n_name": "FRANCE                   ",
+          "n_regionkey": 3,
+          "n_comment": "refully final requests. regular, ironi",
+          "fetched": true
+        },
+        {
+          "nation_ctid": "(0,8)",
+          "n_nationkey": 7,
+          "n_name": "GERMANY                  ",
+          "n_regionkey": 3,
+          "n_comment": "l platelets. regular accounts x-ray: unusual, regular acco",
+          "fetched": true
+        },
+        {
+          "nation_ctid": "(0,9)",
+          "n_nationkey": 8,
+          "n_name": "INDIA                    ",
+          "n_regionkey": 2,
+          "n_comment": "ss excuses cajole slyly across the packages. deposits print aroun",
+          "fetched": true
+        },
+        {
+          "nation_ctid": "(0,10)",
+          "n_nationkey": 9,
+          "n_name": "INDONESIA                ",
+          "n_regionkey": 2,
+          "n_comment": " slyly express asymptotes. regular deposits haggle slyly. carefully ironic hockey players sleep blithely. carefull",
+          "fetched": true
+        },
+        {
+          "nation_ctid": "(0,11)",
+          "n_nationkey": 10,
+          "n_name": "IRAN                     ",
+          "n_regionkey": 4,
+          "n_comment": "efully alongside of the slyly final dependencies. ",
+          "fetched": true
+        },
+        {
+          "nation_ctid": "(0,12)",
+          "n_nationkey": 11,
+          "n_name": "IRAQ                     ",
+          "n_regionkey": 4,
+          "n_comment": "nic deposits boost atop the quickly final requests? quickly regula",
+          "fetched": true
+        },
+        {
+          "nation_ctid": "(0,13)",
+          "n_nationkey": 12,
+          "n_name": "JAPAN                    ",
+          "n_regionkey": 2,
+          "n_comment": "ously. final, express gifts cajole a",
+          "fetched": true
+        },
+        {
+          "nation_ctid": "(0,14)",
+          "n_nationkey": 13,
+          "n_name": "JORDAN                   ",
+          "n_regionkey": 4,
+          "n_comment": "ic deposits are blithely about the carefully regular pa",
+          "fetched": true
+        },
+        {
+          "nation_ctid": "(0,15)",
+          "n_nationkey": 14,
+          "n_name": "KENYA                    ",
+          "n_regionkey": 0,
+          "n_comment": " pending excuses haggle furiously deposits. pending, express pinto beans wake fluffily past t",
+          "fetched": true
+        },
+        {
+          "nation_ctid": "(0,16)",
+          "n_nationkey": 15,
+          "n_name": "MOROCCO                  ",
+          "n_regionkey": 0,
+          "n_comment": "rns. blithely bold courts among the closely regular packages use furiously bold platelets?",
+          "fetched": true
+        },
+        {
+          "nation_ctid": "(0,17)",
+          "n_nationkey": 16,
+          "n_name": "MOZAMBIQUE               ",
+          "n_regionkey": 0,
+          "n_comment": "s. ironic, unusual asymptotes wake blithely r",
+          "fetched": true
+        },
+        {
+          "nation_ctid": "(0,18)",
+          "n_nationkey": 17,
+          "n_name": "PERU                     ",
+          "n_regionkey": 1,
+          "n_comment": "platelets. blithely pending dependencies use fluffily across the even pinto beans. carefully silent accoun",
+          "fetched": true
+        },
+        {
+          "nation_ctid": "(0,19)",
+          "n_nationkey": 18,
+          "n_name": "CHINA                    ",
+          "n_regionkey": 2,
+          "n_comment": "c dependencies. furiously express notornis sleep slyly regular accounts. ideas sleep. depos",
+          "fetched": true
+        },
+        {
+          "nation_ctid": "(0,20)",
+          "n_nationkey": 19,
+          "n_name": "ROMANIA                  ",
+          "n_regionkey": 3,
+          "n_comment": "ular asymptotes are about the furious multipliers. express dependencies nag above the ironically ironic account",
+          "fetched": true
+        },
+        {
+          "nation_ctid": "(0,21)",
+          "n_nationkey": 20,
+          "n_name": "SAUDI ARABIA             ",
+          "n_regionkey": 4,
+          "n_comment": "ts. silent requests haggle. closely express packages sleep across the blithely",
+          "fetched": true
+        },
+        {
+          "nation_ctid": "(0,22)",
+          "n_nationkey": 21,
+          "n_name": "VIETNAM                  ",
+          "n_regionkey": 2,
+          "n_comment": "hely enticingly express accounts. even, final ",
+          "fetched": true
+        },
+        {
+          "nation_ctid": "(0,23)",
+          "n_nationkey": 22,
+          "n_name": "RUSSIA                   ",
+          "n_regionkey": 3,
+          "n_comment": " requests against the platelets use never according to the quickly regular pint",
+          "fetched": true
+        },
+        {
+          "nation_ctid": "(0,24)",
+          "n_nationkey": 23,
+          "n_name": "UNITED KINGDOM           ",
+          "n_regionkey": 3,
+          "n_comment": "eans boost carefully special requests. accounts are. carefull",
+          "fetched": true
+        },
+        {
+          "nation_ctid": "(0,25)",
+          "n_nationkey": 24,
+          "n_name": "UNITED STATES            ",
+          "n_regionkey": 1,
+          "n_comment": "y final packages. slow foxes cajole quickly. quickly silent platelets breach ironic accounts. unusual pinto be",
+          "fetched": true
+        }
+      ]
+    ],
+    "region": [
+      [
+        {
+          "region_ctid": "(0,1)",
+          "r_regionkey": 0,
+          "r_name": "AFRICA                   ",
+          "r_comment": "lar deposits. blithely final packages cajole. regular waters are final requests. regular accounts are according to ",
+          "fetched": true
+        },
+        {
+          "region_ctid": "(0,2)",
+          "r_regionkey": 1,
+          "r_name": "AMERICA                  ",
+          "r_comment": "hs use ironic, even requests. s",
+          "fetched": true
+        },
+        {
+          "region_ctid": "(0,3)",
+          "r_regionkey": 2,
+          "r_name": "ASIA                     ",
+          "r_comment": "ges. thinly even pinto beans ca",
+          "fetched": true
+        },
+        {
+          "region_ctid": "(0,4)",
+          "r_regionkey": 3,
+          "r_name": "EUROPE                   ",
+          "r_comment": "ly final courts cajole furiously final excuse",
+          "fetched": true
+        },
+        {
+          "region_ctid": "(0,5)",
+          "r_regionkey": 4,
+          "r_name": "MIDDLE EAST              ",
+          "r_comment": "uickly special accounts cajole carefully blithely close requests. carefully final asymptotes haggle furiousl",
+          "fetched": true
+        }
+      ]
+    ]
+  }
+}
