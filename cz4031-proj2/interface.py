@@ -1,6 +1,7 @@
-from explore import execute_query, is_query_valid
+from explore import execute_query, is_query_valid, connect_to_database
 import numpy as np
-from PyQt5.QtWidgets import QMainWindow, QVBoxLayout, QWidget, QPushButton, QLineEdit, QMessageBox, QScrollArea
+from PyQt5 import QtCore, QtWidgets
+from PyQt5.QtWidgets import QMainWindow, QVBoxLayout, QWidget, QPushButton, QTextEdit, QMessageBox, QScrollArea, QLabel, QComboBox, QTextBrowser, QTableWidget, QTableWidgetItem, QHeaderView
 import matplotlib
 matplotlib.use('Qt5Agg')
 import matplotlib.pyplot as plt
@@ -14,130 +15,224 @@ class App(QMainWindow):
     def __init__(self, connection_params):
         super().__init__()
         self.connection_params = connection_params
+        try:
+            self.db_connection = connect_to_database(connection_params)
+            print("Connected to the database successfully")
+        except Exception as e:
+            raise ConnectionError(f"Failed to connect to database: {e}")
         self.title = 'SQL Query Visualizer'
-        self.left = 100
-        self.top = 100
-        self.width = 800
-        self.height = 800
+        self.data = None
         self.current_lat = None
         self.current_lon = None
         self.table_to_colour_grids = {}
         self.last_clicked_cell = None
+        self.selected_relation = None  # Initialize to None
         self.initUI()
 
     def initUI(self):
         self.setWindowTitle(self.title)
-        self.setGeometry(self.left, self.top, self.width, self.height)
+        self.resize(800, 400)
+        self.move(100, 100)
+        
+        # Create a central widget
+        self.centralwidget = QtWidgets.QWidget(self)
+        self.centralwidget.setObjectName("centralwidget")
 
-        # Create textbox
-        self.textbox = QLineEdit(self)
-        self.textbox.move(20, 20)
-        self.textbox.resize(400, 40)
+        # Create a QVBoxLayout
+        self.verticalLayout = QtWidgets.QVBoxLayout(self.centralwidget)
+        self.verticalLayout.setContentsMargins(10, 10, 10, 10)
+        self.verticalLayout.setObjectName("verticalLayout")
 
-        # Create a button in the window
-        self.button = QPushButton('Submit SQL Query', self)
-        button_width = 200
-        button_height = 40
-        # Center the button below the text box
-        self.button.setGeometry(
-            (self.width - button_width) // 2, 80, 
-            button_width, button_height
-        )
+        # Add label to the layout
+        self.label = QtWidgets.QLabel("Enter SQL Query Here:")
+        self.label.setObjectName("label")
+        self.verticalLayout.addWidget(self.label)
 
-        # Connect button to function
-        self.button.clicked.connect(self.on_submit)
+        # Add plain text edit to the layout
+        self.plainTextEdit = QtWidgets.QPlainTextEdit()
+        self.plainTextEdit.setObjectName("plainTextEdit")
+        self.plainTextEdit.setMaximumHeight(100)
+        self.verticalLayout.addWidget(self.plainTextEdit)
 
-        # # Plot area
-        # scrollable_area = QScrollArea()
-        # layout = QVBoxLayout()
-        # layout.addWidget(scrollable_area)
+        # Add execute button to the layout
+        self.exeButton = QtWidgets.QPushButton("Execute Query")
+        self.exeButton.setObjectName("exeButton")
+        self.verticalLayout.addWidget(self.exeButton)
 
-        # container = QWidget()
-        # container.setLayout(layout)
+        # Add horizontal layout for other buttons
+        self.horizontalLayout = QtWidgets.QHBoxLayout()
+        self.horizontalLayout.setObjectName("horizontalLayout")
 
-        # self.setCentralWidget(container)
+        # Add QEP button to the horizontal layout
+        self.qepButton = QtWidgets.QPushButton("View Query Execution Plan")
+        self.qepButton.setObjectName("qepButton")
+        self.horizontalLayout.addWidget(self.qepButton)
 
-        self.plot_widget = QWidget(self)
-        self.plot_layout = QVBoxLayout(self.plot_widget)
-        self.plot_widget.setGeometry(100, 140, self.width - 120, self.height - 160)
+        # Add Visualize button to the horizontal layout
+        self.visButton = QtWidgets.QPushButton("Visualize Blocks")
+        self.visButton.setObjectName("visButton")
+        self.horizontalLayout.addWidget(self.visButton)
 
+        # Add horizontal layout to the main vertical layout
+        self.verticalLayout.addLayout(self.horizontalLayout)
 
-        # resizeable
-        # self.setWidget(self.plot_widget)
-        # self.setWidgetResizable(True)
+        # spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        # self.verticalLayout.addItem(spacerItem)
 
-        # self.scroll_area = QScrollArea(self)
-        # self.plot_widget = QWidget(self)
-        # self.plot_layout = QVBoxLayout(self.plot_widget)
-        # self.scroll_area.setWidget(self.plot_widget)
-        # self.scroll_area.setWidgetResizable(True)
-        # self.scroll_area.setGeometry(100, 140, self.width - 120, self.height - 160)
-        # self.plot_widget.setGeometry(100, 120, 500, 300)
+        self.num_blocks_explored = QLabel("Blocks Explored:")
+        self.select_relation = QLabel("Select Relation:")
+        self.select_block_id = QLabel("Select Block ID:")
+        # view tuples in selected block
+        self.block_tuple_viewer = QTextBrowser()
+
+        # dropdowns selection
+        self.relation_selector = QComboBox()
+        self.relation_selector.setEnabled(False)
+        self.relation_selector.currentTextChanged.connect(lambda relation: self.update_relation_selector(relation))
+
+        self.block_id_selector = QComboBox()
+        self.block_id_selector.setEnabled(False)
+        self.block_id_selector.currentTextChanged.connect(lambda block_id: self.display_curr_block_contents(block_id))
+
+        # Initialize table and scroll area as instance variables
+        self.table = None
+        self.scroll_area = None
+
+        self.verticalLayout.addWidget(self.num_blocks_explored)
+        self.verticalLayout.addWidget(self.select_relation)
+        self.verticalLayout.addWidget(self.relation_selector)
+        self.verticalLayout.addWidget(self.select_block_id)
+        self.verticalLayout.addWidget(self.block_id_selector)
+        # self.verticalLayout.addWidget(self.block_tuple_viewer)
+
+        # Connecting buttons to their functions
+        self.exeButton.clicked.connect(self.on_submit)
+        self.visButton.clicked.connect(self.display_plot)
+
+        # Set the central widget
+        self.setCentralWidget(self.centralwidget)
 
         self.show()
-        
-    
-
-    # def initUI(self):
-    #     self.setWindowTitle(self.title)
-    #     self.setGeometry(self.left, self.top, self.width, self.height)
-
-    #     # Create textbox
-    #     self.textbox = QLineEdit(self)
-    #     self.textbox.move(20, 20)
-    #     self.textbox.resize(400, 40)
-
-    #     # Create a button in the window
-    #     self.button = QPushButton('Submit SQL Query', self)
-    #     self.button.move(20, 80)
-
-    #     # Connect button to function
-    #     self.button.clicked.connect(self.on_submit)
-
-    #     # Plot area
-    #     self.plot_widget = QWidget(self)
-    #     self.plot_layout = QVBoxLayout(self.plot_widget)
-    #     self.plot_widget.setGeometry(100, 120, 500, 300)
-
-    #     self.show()
 
     def on_submit(self):
         # Execute the SQL query here (placeholder function)
-        query = self.textbox.text()
+        query = self.plainTextEdit.toPlainText()
         print(f"Executing SQL Query: {query}")
         
         if is_query_valid(query):
-            json_output = execute_query(query, self.connection_params)
-            if not json_output['explain_result']:
+            data = execute_query(query, self.connection_params)
+            if not data['explain_result']:
                 print('Invalid query')
                 QMessageBox.warning(self, "Error", "Invalid query.")
+                self.data = None
                 return
-            self.display_plot(json_output)
+            # Display the Matplotlib plot
+            # self.display_plot(data)
+            self.data = data
+            relations = list(data['block_dict'].keys())
+            self.relation_selector.clear()
+            self.relation_selector.addItems(relations)
+            self.relation_selector.setEnabled(True)
         else:
+            self.data = None
+            if len(query) == 0:
+                QMessageBox.warning(self, "Error", "No input found. Please enter an SQL SELECT query.")
+                print('No input found.')
+            else:
+                QMessageBox.warning(self, "Error", "Forbidden keyword in query. (DELETE, UPDATE, WITH)")
+                print('Forbidden keyword in query.')
 
-            QMessageBox.warning(self, "Error", "Forbidden keyword in query. (DELETE, UPDATE, WITH)")
-            print('Forbidden keyword in query.')
-        # print(json_output)
-        # Display the Matplotlib plot
-        
+    def update_relation_selector(self, relation):
+        self.selected_relation = relation
+        if self.selected_relation == '':
+            return
+        block_ids = self.data['block_dict'][relation]
 
-    def display_plot(self, json_output):
-        # Clear previous plots
-        for i in reversed(range(self.plot_layout.count())): 
-            self.plot_layout.itemAt(i).widget().setParent(None)
+        last_block = ast.literal_eval(self.data['block_result'][relation][-1][-1][f"{relation}_ctid"])[0]
+        last_block_index = block_ids.index(last_block)
+        block_ids = self.data['block_dict'][relation][:last_block_index+1]
 
+        block_ids = list(map(str, block_ids))
+        self.block_id_selector.clear()
+        self.block_id_selector.addItems(block_ids)
+        self.block_id_selector.setEnabled(True)
+        # Update the label with the number of blocks hit
+        blocks_hit = len(self.data['block_dict'][relation])
+        self.num_blocks_explored.setText(f"Blocks Explored: {blocks_hit}")
+
+
+    def display_curr_block_contents(self, block_id):
+        if self.selected_relation is not None and block_id != '':
+            smallest_index = self.data['block_dict'][self.selected_relation][0]
+            index = int(block_id) - smallest_index
+            block_content = self.data['block_result'][self.selected_relation][index]
+
+            # Clear existing content in the QTextBrowser
+            self.block_tuple_viewer.clear()
+
+            # Display the content in a table
+            self.display_table(block_content)
+
+    def display_table(self, block_content):
+        if not block_content:
+            return
+
+        # Clear existing table and scroll area
+        if self.table is not None:
+            self.table.setParent(None)
+        if self.scroll_area is not None:
+            self.scroll_area.setParent(None)
+
+        # Create a table widget
+        self.table = QTableWidget()
+
+        # Set the number of rows and columns
+        self.table.setRowCount(len(block_content))
+        self.table.setColumnCount(len(block_content[0]))
+
+        # Set the table headers
+        headers = list(block_content[0].keys())
+        self.table.setHorizontalHeaderLabels(headers)
+
+        # Populate the table with data
+        for row, entry in enumerate(block_content):
+            for col, key in enumerate(headers):
+                item = QTableWidgetItem(str(entry[key]))
+                self.table.setItem(row, col, item)
+
+        # Auto-resize columns to contents
+        self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
+
+        # Create a scroll area and set the table as its widget
+        self.scroll_area = QScrollArea()
+        self.scroll_area.setWidget(self.table)
+        self.scroll_area.setWidgetResizable(True)
+
+        # Clear the existing content of QTextBrowser (if any)
+        self.block_tuple_viewer.clear()
+
+        # Add the scroll area directly to the layout
+        self.verticalLayout.addWidget(self.scroll_area)
+        self.resize(max(self.width(), 800), max(self.height(), 800))
+        # # Add the scroll area to the QTextBrowser
+        # self.block_tuple_viewer.setLayout(QVBoxLayout())
+        # self.block_tuple_viewer.layout().addWidget(self.scroll_area)
+
+    def display_plot(self):
         # Matplotlib plot
-        fig, axs = self.create_matplotlib_plot(json_output)
+        matplotlib.pyplot.close('all')
+        if not self.data:
+            QMessageBox.warning(self, "Error", "Please execute a query first.")
+            return
+        fig, axs = self.create_matplotlib_plot(self.data)
 
         # Opens a new window with the visualization of the first 100 blocks from the first block hit
         fig.show()
-        # canvas = FigureCanvas(fig)
-        # self.plot_layout.addWidget(canvas)
 
-    def create_matplotlib_plot(self, json_output):
+    def create_matplotlib_plot(self, data):
         self.last_clicked_cell = None
         self.table_to_colour_grids = {}
-        block_result = json_output['block_result']
+        block_result = data['block_result']
         num_tables = len(block_result)
         tables = list(block_result.keys())
 
@@ -162,14 +257,25 @@ class App(QMainWindow):
                     if block_number < len(block_result[table_name]):
                         block_data = block_result[table_name][self.current_lat*10 + self.current_lon]
                         # Wrap the text using textwrap
-                        wrapped_text = textwrap.fill(f"{self.current_lat} Long, {self.current_lon} Lat, Event Long: {event_lon}, Event Lat: {event_lat}, {table_name} Table, {block_data[0][f'{table_name}_ctid']}", width=20)
+                        # wrapped_text = textwrap.fill(f"{self.current_lat} Long, {self.current_lon} Lat, Event Long: {event_lon}, Event Lat: {event_lat}, {table_name} Table, {block_data[0][f'{table_name}_ctid']}", width=20)
+                        # block number, no of tuples, no of tuples hit
+                        # print(block_data)
+                        block_number = ast.literal_eval(block_data[0][f"{table_name}_ctid"])[0]
+                        no_of_tuples = len(block_data)
+                        count_true = sum(1 for entry in block_data if entry.get("fetched"))
 
-                        # remove json appending
-                        file_path = 'hover_output.json' # Replace with your file path
-                        with open(file_path, 'w') as file:
-                            json.dump(block_data, file)
+                        wrapped_text = f"Current Block: {block_number} \n Number of Tuples in Block: {no_of_tuples} \n Number of Tuples Hit: {count_true}"
+                        wrapped_text = '\n'.join(wrapped_text.split('\n'))
+                        
+
+                        # # remove json appending 
+                        # file_path = 'hover_output.json' # Replace with your file path
+                        # with open(file_path, 'w') as file:
+                        #     json.dump(block_data, file)
                     else:
-                        block_data = f'EMPTY BLOCK {block_number} \n{self.current_lat} Long, {self.current_lon} Lat \n Event Long: {event_lon}, Event Lat: {event_lat}'
+                        # block_data = f'EMPTY BLOCK {block_number} \n{self.current_lat} Long, {self.current_lon} Lat \n Event Long: {event_lon}, Event Lat: {event_lat}'
+                        block_data = f'Current Block: {block_number} \n Empty Block'
+                        
                         wrapped_text = textwrap.fill(block_data, width=20)
                     if num_tables > 1:
                         axs[-1, 1].clear()
@@ -185,15 +291,12 @@ class App(QMainWindow):
                 y_index = int(event.ydata + 0.5)
                 
                 if 0 <= x_index < grid_colour.shape[1] and 0 <= y_index < grid_colour.shape[0]:
-                    print("on_move", table_name)
-                    # print(self.last_clicked_cell)
                     # Restore the color of last click
                     if self.last_clicked_cell:
                         old_table, old_y, old_x, old_colour = self.last_clicked_cell
                         old_m, old_grid_colour = self.table_to_colour_grids[old_table]
                         old_grid_colour[old_y, old_x] = old_colour
                         old_m.set_array(old_grid_colour.ravel())
-                        # print(old_m, old_grid_colour)
                     # Change the color of the clicked cell
                     self.last_clicked_cell = (table_name, y_index, x_index, grid_colour[y_index, x_index])
                     grid_colour[y_index, x_index] = 0.5
@@ -203,7 +306,6 @@ class App(QMainWindow):
 
                     # Redraw the canvas
                     fig.canvas.draw_idle()
-
 
         for i in range(num_tables):
             if num_tables > 1:
@@ -217,7 +319,7 @@ class App(QMainWindow):
 
             table = tables[i]
             blocks = block_result[table]
-            blocks_accessed = json_output['block_dict'][table]
+            blocks_accessed = data['block_dict'][table]
             blocks_accessed_set = set(blocks_accessed)
 
             ctid_name = table + '_ctid'
@@ -236,16 +338,10 @@ class App(QMainWindow):
             # plot colour mesh, add edgecolors and linewidths to draw borders around cells
             m = ax.pcolormesh(mlon, mlat, grid_colour, cmap='Blues', edgecolors='black', linewidths=0.5, vmin=0, vmax=1)
             self.table_to_colour_grids[table] = (m, grid_colour)
-            # Remove colorbar
-            # cb = fig.colorbar(m, ax=ax)
-            # cb.remove()
 
             ax.set_title(f'Table Name: {table}')
             
-
             # Connect the same on_move listener to all graphs
-            # cid = fig.canvas.mpl_connect('motion_notify_event', lambda event, ax=axs[i, 0], table_name=table: on_move(event, ax, table))
-            print(table)
             on_move_lambda = make_on_move_lambda(ax, table, grid_colour, m)
             cid = fig.canvas.mpl_connect('button_press_event', on_move_lambda)
 

@@ -6,6 +6,20 @@ import ast
 import json
 import re
 
+def connect_to_database(params):
+    try:
+        # Connect to your postgres DB
+        conn = psycopg2.connect(
+            dbname=params["dbname"],
+            user=params["user"],
+            password=params["password"],
+            host=params["host"]
+        )
+        return conn
+    except psycopg2.OperationalError as e:
+        # Handle connection error
+        raise psycopg2.OperationalError(f"Database connection failed: {e}")
+
 def execute_query(query, connection_params):
     # Remove all trailing spaces and convert to lowercase
     query = query.lower().strip()
@@ -54,13 +68,13 @@ def execute_query(query, connection_params):
             'block_dict': block_dict, # gives us the blocks that should be highlighted
             'block_result': block_result # gives us all the tuples of all tables queried in a block-based format
         }
-        testoutput = {
-            'block_dict': block_dict, # gives us the blocks that should be highlighted
-            'block_result': block_result # gives us all the tuples of all tables queried in a block-based format
-        }
-        file_path = 'output.json' # Replace with your file path
-        with open(file_path, 'w') as file:
-            json.dump(testoutput, file)
+        # testoutput = {
+        #     'block_dict': block_dict, # gives us the blocks that should be highlighted
+        #     'block_result': block_result # gives us all the tuples of all tables queried in a block-based format
+        # }
+        # file_path = 'output.json' # Replace with your file path
+        # with open(file_path, 'w') as file:
+        #     json.dump(testoutput, file)
         return res
     # this line will never run because query input is required in interface.py
     return jsonify({'error': 'No query provided'}), 400
@@ -144,7 +158,6 @@ def all_ctid_query(query, tuple_dict, connection_params):
         results = {}
         for table_name in table_names:
             start_block_ctid = tuple_dict[table_name][0]
-            print(start_block_ctid)
             offset_val_query = f"""
             SELECT rownum FROM (
                 SELECT ROW_NUMBER() OVER (ORDER BY ctid) AS rownum, ctid
@@ -152,9 +165,11 @@ def all_ctid_query(query, tuple_dict, connection_params):
             ) AS subquery
             WHERE ctid = '{str(start_block_ctid)}';
             """
+            
             cur.execute(offset_val_query)
-            offset_val = cur.fetchone()[0]
-            print(offset_val)
+            # the query returns the row number of the first tuple found. hence, we subtract one from the
+            # query value to obtain the actual offset value
+            offset_val = cur.fetchone()[0] - 1
             
             all_query = f"""
             SELECT array_to_json(array_agg(row_to_json(t))) FROM (
@@ -183,6 +198,7 @@ def run_ctid_query(query, connection_params):
             {modify_query_add_ctid(query, table_names)}
         ) t
         """
+        # print("CTID QUERY:", ctid_query)
         cur.execute(ctid_query)
         result = cur.fetchone()
         cur.close()

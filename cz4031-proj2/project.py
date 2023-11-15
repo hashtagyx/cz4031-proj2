@@ -11,7 +11,11 @@ connection_params = {
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    # add error handling if cannot connect to db, exit the application
 
-    ex = App(connection_params=connection_params)
+    try:
+        ex = App(connection_params=connection_params)
+    except ConnectionError as e:
+        print(e)
+        sys.exit(1)
+
     sys.exit(app.exec_())
