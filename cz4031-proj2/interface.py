@@ -139,6 +139,8 @@ class App(QMainWindow):
                 print('Invalid query')
                 QMessageBox.warning(self, "Error", "Invalid query.")
                 self.data = None
+                self.relation_selector.clear()
+                self.block_id_selector.clear()
                 return
 
             # If the query is valid, update the class attribute with the query results
