@@ -408,7 +408,7 @@ class App(QMainWindow):
         # Define attributes that will be added as node attributes in the graph
         qep_attrs = ['Relation Name', 'Hash Cond', 'Merge Cond', 'Join Type', 'Shared Hit Blocks', 'Filter', 'Rows Removed by Filter']
 
-        # Function to add attributes to a graph node
+        # Function to add relevant (non-NAN) attributes to a graph node
         def add_attr(ptr, g, attrs):
             # Assign the name of the node
             g.vs[ptr]['name'] = attrs['Node Type']
@@ -420,7 +420,7 @@ class App(QMainWindow):
         # Extract the plan data from the query execution plan result
         result_data = self.data['explain_result'][0]
 
-        # Initialize a graph
+        # Initialize a graph, add root
         g = Graph()
         g.add_vertex()
         # Add attributes to the root vertex
@@ -434,13 +434,13 @@ class App(QMainWindow):
             temp_result = [(0, result_data['Plan']['Plans'])] # List of tuples (parent ID, plan)
             while len(temp_result) > 0: # temp_result is a list
                 parent, loop_result = temp_result.pop(0)
-                for p in loop_result[:]: # p is a dict
+                for p in loop_result[:]: # p is a dict of attributes
                     ptr += 1
-                    g.add_vertex()
+                    g.add_vertex() # Manually add node to graph
                     g.add_edge(ptr, parent) # Manually add an edge to the graph
                     add_attr(ptr, g, p) # Add attributes to the current node
 
-                    # Add the current node's children if they exist
+                    # Add the current node's children to unvisited list if they exist
                     if 'Plans' in p:
                         temp_result.append((ptr, p['Plans']))
 

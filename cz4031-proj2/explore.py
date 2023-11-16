@@ -29,8 +29,9 @@ def connect_to_database(params):
 #     'block_result': JSON object containing the tuples of each table in the query. Keys are the table names, values are the list of blocks of each table. Within each list of blocks are the individual tuple entries.
 # }
 def execute_query(query, connection_params):
-    # Preprocessing the query: lowercasing, stripping spaces, and removing semicolons
-    query = query.lower().strip()
+    # Preprocessing the query: stripping leading/trailing spaces, standardise use of '', remove semicolon
+    query = query.strip()
+    query = query.replace('"', "'") # ensures all string-based conditional statements work
     query = query.replace(";", "")
 
     # Execute the query if it's not empty
